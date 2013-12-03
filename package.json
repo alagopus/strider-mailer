@@ -1,0 +1,27 @@
+{
+  "name": "strider-mailer",
+  "version": "0.0.0",
+  "description": "Mailer class for Strider",
+  "main": "mailer.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/microadam/strider-mailer.git"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha -R spec"
+  },
+  "keywords": [
+    "strider"
+  ],
+  "author": "Strider CD",
+  "homepage": "https://github.com/microadam/strider-mailer",
+  "dependencies": {
+    "everypaas": "0.0.7",
+    "nodemailer": "~0.5.11",
+    "underscore": "~1.5.2"
+  },
+  "devDependencies": {
+    "mocha": "~1.15.1",
+    "expect.js": "~0.2.0"
+  }
+}
