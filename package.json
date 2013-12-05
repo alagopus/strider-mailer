@@ -5,7 +5,10 @@
   "main": "mailer.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/microadam/strider-mailer.git"
+    "url": "git://github.com/Strider-CD/strider-mailer.git"
+  },
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha -R spec"
@@ -14,7 +17,7 @@
     "strider"
   ],
   "author": "Strider CD",
-  "homepage": "https://github.com/microadam/strider-mailer",
+  "homepage": "https://github.com/Strider-CD/strider-mailer",
   "dependencies": {
     "everypaas": "0.0.7",
     "nodemailer": "~0.5.11",
