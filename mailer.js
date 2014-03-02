@@ -31,15 +31,20 @@ module.exports = function (config) {
       )
     } else if (config.smtp) {
       console.log('Using SMTP transport from config')
-      smtpTransport = nodemailer.createTransport('SMTP',
-        { host:config.smtp.host
-        , port:parseInt(config.smtp.port, 10)
-        , auth:
+      var smtpConfig = 
+        { host: config.smtp.host
+        , port: parseInt(config.smtp.port, 10)
+        }
+      
+      // allow anonymous SMTP login if user and pass are not defined
+      if (config.smtp.auth.user && config.smtp.auth.pass) {
+        smtpConfig.auth =
           { user: config.smtp.auth.user
           , pass: config.smtp.auth.pass
           }
-        }
-      )
+      }
+      
+      smtpTransport = nodemailer.createTransport('SMTP', smtpConfig)
     }
   }
 
