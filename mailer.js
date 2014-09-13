@@ -31,11 +31,11 @@ module.exports = function (config) {
       )
     } else if (config.smtp) {
       console.log('Using SMTP transport from config')
-      var smtpConfig = 
+      var smtpConfig =
         { host: config.smtp.host
         , port: parseInt(config.smtp.port, 10)
         }
-      
+
       // allow anonymous SMTP login if user and pass are not defined
       if (config.smtp.auth.user && config.smtp.auth.pass) {
         smtpConfig.auth =
@@ -43,8 +43,11 @@ module.exports = function (config) {
           , pass: config.smtp.auth.pass
           }
       }
-      
+
       smtpTransport = nodemailer.createTransport('SMTP', smtpConfig)
+    } else if (config.stubSmtp) {
+      console.log('stubbing smtp..');
+      smtpTransport = nodemailer.createTransport('Stub');
     }
   }
 
@@ -62,6 +65,9 @@ module.exports = function (config) {
     smtpTransport.sendMail(mailOptions, function(error, response) {
       if (error) {
         console.log('Error sending email:', error)
+      }
+      if (config.stubSmtp) {
+        console.log(response.message);
       }
       if (callback) {
         callback(error, response)
