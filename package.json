@@ -21,7 +21,7 @@
   "dependencies": {
     "everypaas": "0.0.7",
     "nodemailer": "~0.5.11",
-    "underscore": "~1.5.2"
+    "lodash.foreach": "~2.4.1"
   },
   "devDependencies": {
     "mocha": "~1.15.1",

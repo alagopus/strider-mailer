@@ -1,6 +1,6 @@
-var everypaas = require('everypaas')
-  , nodemailer = require('nodemailer')
-  , _ = require('underscore')
+var everypaas = require('everypaas');
+var nodemailer = require('nodemailer');
+var each = require('lodash.foreach');
 
 module.exports = function (config) {
   /*
@@ -8,43 +8,43 @@ module.exports = function (config) {
    */
   // Default to printing a warning
   var smtpTransport = {
-    sendMail: function(opts, cb) {
-      console.log('WARNING: no SMTP transport detected nor configured. Cannot send email.')
-      cb(null, {message: null})
+    sendMail: function (opts, cb) {
+      console.log('WARNING: no SMTP transport detected nor configured. Cannot send email.');
+      cb(null, { message: null });
     }
-  }
+  };
 
   // Try using SendGrid / Mailgun
   if (everypaas.getSMTP() !== null) {
-    console.log('Using SMTP transport: %j', everypaas.getSMTP())
-    smtpTransport = nodemailer.createTransport.apply(null, everypaas.getSMTP())
+    console.log('Using SMTP transport: %j', everypaas.getSMTP());
+    smtpTransport = nodemailer.createTransport.apply(null, everypaas.getSMTP());
   } else {
     if (config.sendgrid) {
-      console.log('Using Sendgrid transport from config ')
-      smtpTransport = nodemailer.createTransport('SMTP',
-        { service: 'SendGrid'
-        , auth:
-          { user: config.sendgrid.username
-          , pass: config.sendgrid.password
-          }
+      console.log('Using Sendgrid transport from config');
+      smtpTransport = nodemailer.createTransport('SMTP', {
+        service: 'SendGrid',
+        auth: {
+          user: config.sendgrid.username,
+          pass: config.sendgrid.password
         }
-      )
+      });
     } else if (config.smtp) {
-      console.log('Using SMTP transport from config')
-      var smtpConfig =
-        { host: config.smtp.host
-        , port: parseInt(config.smtp.port, 10)
-        }
+      console.log('Using SMTP transport from config');
+      var smtp = config.smtp;
+      var smtpConfig = {
+        host: smtp.host,
+        port: parseInt(smtp.port, 10)
+      };
 
       // allow anonymous SMTP login if user and pass are not defined
-      if (config.smtp.auth.user && config.smtp.auth.pass) {
-        smtpConfig.auth =
-          { user: config.smtp.auth.user
-          , pass: config.smtp.auth.pass
-          }
+      if (smtp.auth && smtp.auth.user && smtp.auth.pass) {
+        smtpConfig.auth = {
+          user: smtp.auth.user,
+          pass: smtp.auth.pass
+        };
       }
 
-      smtpTransport = nodemailer.createTransport('SMTP', smtpConfig)
+      smtpTransport = nodemailer.createTransport('SMTP', smtpConfig);
     } else if (config.stubSmtp) {
       console.log('stubbing smtp..');
       smtpTransport = nodemailer.createTransport('Stub');
@@ -52,7 +52,7 @@ module.exports = function (config) {
   }
 
   function send(to, subject, textBody, htmlBody, from, callback) {
-    from = from || (config.smtp ? config.smtp.from : null)
+    from = from || (config.smtp ? config.smtp.from : null);
 
     var mailOptions = {
       from: from, // sender address
@@ -60,19 +60,21 @@ module.exports = function (config) {
       subject: subject, // Subject line
       text: textBody, // plaintext body_template
       html: htmlBody // html body
-    }
+    };
     // send mail with defined transport object
-    smtpTransport.sendMail(mailOptions, function(error, response) {
+    smtpTransport.sendMail(mailOptions, function (error, response) {
       if (error) {
-        console.log('Error sending email:', error)
+        console.log('Error sending email: ', error);
       }
+
       if (config.stubSmtp) {
         console.log(response.message);
       }
+
       if (callback) {
-        callback(error, response)
+        callback(error, response);
       }
-    })
+    });
   }
 
   /*
@@ -83,43 +85,47 @@ module.exports = function (config) {
    */
   function format_stdmerged(stdmerged, emailFormat) {
     // 4k
-    var start = stdmerged.length - 1 - 4096
+    var start = stdmerged.length - 1 - 4096;
+
     if (start < 0) {
-      start = 0
+      start = 0;
     }
-    var tlog = stdmerged.slice(start, stdmerged.length - 1).replace(/^\s+|\s+$/g,'')
+
+    var tlog = stdmerged.slice(start, stdmerged.length - 1).replace(/^\s+|\s+$/g,'');
     // Start each line with a space
+    var tlines = tlog.split('\n');
+    var b = new Buffer(8192);
+    var offset = 0;
 
-    var tlines = tlog.split('\n')
+    each(tlines, function (l) {
+      var towrite;
 
-    var b = new Buffer(8192)
-    var offset = 0
-    _.each(tlines, function(l) {
-      var towrite
       if (emailFormat === 'plaintext') {
-        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '\n'
+        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '\n';
       } else {
-        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '<br>\n'
+        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '<br>\n';
       }
 
-      b.write(towrite, offset, towrite.length)
-      offset += towrite.length
-    })
+      b.write(towrite, offset, towrite.length);
+      offset += towrite.length;
+    });
 
-    return b.toString('utf8', 0, offset)
+    return b.toString('utf8', 0, offset);
   }
 
   function elapsed_time(start, finish) {
-    var inSeconds = (finish - start) / 1000
+    var inSeconds = (finish - start) / 1000;
+
     if (inSeconds > 60) {
-      return (Math.floor(inSeconds / 60) + 'm ' + Math.round(inSeconds % 60) + 's')
+      return (Math.floor(inSeconds / 60) + 'm ' + Math.round(inSeconds % 60) + 's');
     } else {
-      return (Math.round(inSeconds) + 's')
+      return (Math.round(inSeconds) + 's');
     }
   }
 
-  return { send: send
-  , format_stdmerged: format_stdmerged
-  , elapsed_time: elapsed_time
-  }
-}
+  return {
+    send: send,
+    format_stdmerged: format_stdmerged,
+    elapsed_time: elapsed_time
+  };
+};
