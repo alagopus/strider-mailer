@@ -36,6 +36,11 @@ module.exports = function (config) {
         port: parseInt(smtp.port, 10)
       };
 
+			// enable secureConnection is port is 465 to use encrypted handshake
+			if (smtpConfig.port == 465) {
+				smtpConfig.secureConnection = true;
+			}
+
       // allow anonymous SMTP login if user and pass are not defined
       if (smtp.auth && smtp.auth.user && smtp.auth.pass) {
         smtpConfig.auth = {
