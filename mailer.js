@@ -1,6 +1,7 @@
+var debug = require('debug')('strider-mailer');
+var each = require('lodash.foreach');
 var everypaas = require('everypaas');
 var nodemailer = require('nodemailer');
-var each = require('lodash.foreach');
 
 module.exports = function (config) {
   /*
@@ -9,18 +10,18 @@ module.exports = function (config) {
   // Default to printing a warning
   var smtpTransport = {
     sendMail: function (opts, cb) {
-      console.log('WARNING: no SMTP transport detected nor configured. Cannot send email.');
-      cb(null, { message: null });
+      debug('WARNING: no SMTP transport detected nor configured. Cannot send email.');
+      cb(null, {message: null});
     }
   };
 
   // Try using SendGrid / Mailgun
   if (everypaas.getSMTP() !== null) {
-    console.log('Using SMTP transport: %j', everypaas.getSMTP());
+    debug('Using SMTP transport: %j', everypaas.getSMTP());
     smtpTransport = nodemailer.createTransport.apply(null, everypaas.getSMTP());
   } else {
     if (config.sendgrid) {
-      console.log('Using Sendgrid transport from config');
+      debug('Using Sendgrid transport from config');
       smtpTransport = nodemailer.createTransport('SMTP', {
         service: 'SendGrid',
         auth: {
@@ -29,17 +30,17 @@ module.exports = function (config) {
         }
       });
     } else if (config.smtp) {
-      console.log('Using SMTP transport from config');
+      debug('Using SMTP transport from config');
       var smtp = config.smtp;
       var smtpConfig = {
         host: smtp.host,
         port: parseInt(smtp.port, 10)
       };
 
-			// enable secureConnection is port is 465 to use encrypted handshake
-			if (smtpConfig.port == 465) {
-				smtpConfig.secureConnection = true;
-			}
+      // enable secureConnection is port is 465 to use encrypted handshake
+      if (smtpConfig.port == 465) {
+        smtpConfig.secureConnection = true;
+      }
 
       // allow anonymous SMTP login if user and pass are not defined
       if (smtp.auth && smtp.auth.user && smtp.auth.pass) {
@@ -51,7 +52,7 @@ module.exports = function (config) {
 
       smtpTransport = nodemailer.createTransport('SMTP', smtpConfig);
     } else if (config.stubSmtp) {
-      console.log('stubbing smtp..');
+      debug('stubbing smtp..');
       smtpTransport = nodemailer.createTransport('Stub');
     }
   }
@@ -69,11 +70,11 @@ module.exports = function (config) {
     // send mail with defined transport object
     smtpTransport.sendMail(mailOptions, function (error, response) {
       if (error) {
-        console.log('Error sending email: ', error);
+        debug('Error sending email: ', error);
       }
 
       if (config.stubSmtp) {
-        console.log(response.message);
+        debug(response.message);
       }
 
       if (callback) {
@@ -96,7 +97,7 @@ module.exports = function (config) {
       start = 0;
     }
 
-    var tlog = stdmerged.slice(start, stdmerged.length - 1).replace(/^\s+|\s+$/g,'');
+    var tlog = stdmerged.slice(start, stdmerged.length - 1).replace(/^\s+|\s+$/g, '');
     // Start each line with a space
     var tlines = tlog.split('\n');
     var b = new Buffer(8192);
@@ -106,9 +107,9 @@ module.exports = function (config) {
       var towrite;
 
       if (emailFormat === 'plaintext') {
-        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '\n';
+        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi, '') + '\n';
       } else {
-        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi,'') + '<br>\n';
+        towrite = ' ' + l.replace(/\[(\d)?\d*m/gi, '') + '<br>\n';
       }
 
       b.write(towrite, offset, towrite.length);

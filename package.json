@@ -19,12 +19,14 @@
   "author": "Strider CD",
   "homepage": "https://github.com/Strider-CD/strider-mailer",
   "dependencies": {
+    "debug": "^2.2.0",
     "everypaas": "0.0.7",
-    "nodemailer": "~0.5.11",
-    "lodash.foreach": "~2.4.1"
+    "lodash.foreach": "~2.4.1",
+    "nodemailer": "~0.5.11"
   },
   "devDependencies": {
-    "mocha": "~1.15.1",
-    "expect.js": "~0.2.0"
+    "eslint": "^3.1.1",
+    "expect.js": "~0.2.0",
+    "mocha": "~1.15.1"
   }
 }
