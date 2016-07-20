@@ -3,6 +3,7 @@
   "version": "0.2.1",
   "description": "Mailer class for Strider",
   "main": "mailer.js",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git://github.com/Strider-CD/strider-mailer.git"
