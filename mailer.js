@@ -41,7 +41,7 @@ module.exports = function (config) {
       smtpTransport = nodemailer.createTransport(smtpConfig);
     } else if (config.stubSmtp) {
       debug('stubbing smtp..');
-      smtpTransport = nodemailer.createTransport('Stub');
+      smtpTransport = nodemailer.createTransport({jsonTransport: true});
     }
   }
 
